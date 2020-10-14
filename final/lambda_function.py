@@ -1,16 +1,16 @@
 
-import logging
-import json
-import ask_sdk_core.utils as ask_utils
+    import logging
+    import json
+    import ask_sdk_core.utils as ask_utils
 
-from ask_sdk_core.skill_builder import SkillBuilder
-from ask_sdk_core.dispatch_components import AbstractRequestHandler
-from ask_sdk_core.dispatch_components import AbstractExceptionHandler
-from ask_sdk_core.dispatch_components import AbstractRequestInterceptor
-from ask_sdk_core.dispatch_components import AbstractResponseInterceptor
-from ask_sdk_core.handler_input import HandlerInput
+    from ask_sdk_core.skill_builder import SkillBuilder
+    from ask_sdk_core.dispatch_components import AbstractRequestHandler
+    from ask_sdk_core.dispatch_components import AbstractExceptionHandler
+    from ask_sdk_core.dispatch_components import AbstractRequestInterceptor
+    from ask_sdk_core.dispatch_components import AbstractResponseInterceptor
+    from ask_sdk_core.handler_input import HandlerInput
 
-from ask_sdk_model import Response
+    from ask_sdk_model import Response
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -29,7 +29,7 @@ class GetDescriptionAPIHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        recommendationResult = handler_input.requestEnvelope.request.apiRequest.arguments.recommendationResult
+        recommendationResult = handler_input.request_envelope.request.apiRequest.arguments.recommendationResult
 
         # setting the default response.
         databaseResponse = "I don't know much about " + recommendationResult.name + "."
@@ -59,7 +59,7 @@ class GetRecommendationAPIHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        apiRequest = handler_input.requestEnvelope.request.apiRequest
+        apiRequest = handler_input.request_envelope.request.apiRequest
 
         energy = resolveEntity(apiRequest.slots, "energy")
         size = resolveEntity(apiRequest.slots, "size")

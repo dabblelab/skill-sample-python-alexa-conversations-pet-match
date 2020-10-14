@@ -29,7 +29,7 @@ class GetRecommendationAPIHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        apiRequest = handler_input.requestEnvelope.request.apiRequest
+        apiRequest = handler_input.request_envelope.request.apiRequest
 
         energy = resolveEntity(apiRequest.slots, "energy")
         size = resolveEntity(apiRequest.slots, "size")
