@@ -1,16 +1,15 @@
+import logging
+import json
+import ask_sdk_core.utils as ask_utils
 
-    import logging
-    import json
-    import ask_sdk_core.utils as ask_utils
+from ask_sdk_core.skill_builder import SkillBuilder
+from ask_sdk_core.dispatch_components import AbstractRequestHandler
+from ask_sdk_core.dispatch_components import AbstractExceptionHandler
+from ask_sdk_core.dispatch_components import AbstractRequestInterceptor
+from ask_sdk_core.dispatch_components import AbstractResponseInterceptor
+from ask_sdk_core.handler_input import HandlerInput
 
-    from ask_sdk_core.skill_builder import SkillBuilder
-    from ask_sdk_core.dispatch_components import AbstractRequestHandler
-    from ask_sdk_core.dispatch_components import AbstractExceptionHandler
-    from ask_sdk_core.dispatch_components import AbstractRequestInterceptor
-    from ask_sdk_core.dispatch_components import AbstractResponseInterceptor
-    from ask_sdk_core.handler_input import HandlerInput
-
-    from ask_sdk_model import Response
+from ask_sdk_model import Response
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -24,19 +23,19 @@ data = json.loads(jsonData)
 class GetDescriptionAPIHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.apiRequest.name == 'getDescription'
+        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.api_request.name == 'getDescription'
 
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        recommendationResult = handler_input.request_envelope.request.apiRequest.arguments.recommendationResult
+        recommendationResult = handler_input.request_envelope.request.api_request.arguments.recommendation_result
 
         # setting the default response.
-        databaseResponse = "I don't know much about " + recommendationResult.name + "."
+        databaseResponse = "I don't know much about " + recommendationResult['name'] + "."
         
-        energy = recommendationResult.energy
-        size = recommendationResult.size
-        temperament = recommendationResult.temperament
+        energy = recommendationResult['energy']
+        size = recommendationResult['size']
+        temperament = recommendationResult['temperament']
         
         # setting the actual response if we find a match for their preference
         if energy != None and size != None and temperament != None:
@@ -54,16 +53,16 @@ class GetDescriptionAPIHandler(AbstractRequestHandler):
 class GetRecommendationAPIHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.apiRequest.name == 'getRecommendation'
+        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.api_request.name == 'getRecommendation'
 
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        apiRequest = handler_input.request_envelope.request.apiRequest
+        api_request = handler_input.request_envelope.request.api_request
 
-        energy = resolveEntity(apiRequest.slots, "energy")
-        size = resolveEntity(apiRequest.slots, "size")
-        temperament = resolveEntity(apiRequest.slots, "temperament")
+        energy = resolveEntity(api_request.slots, "energy")
+        size = resolveEntity(api_request.slots, "size")
+        temperament = resolveEntity(api_request.slots, "temperament")
 
         recommendationResult = {}
 
@@ -73,10 +72,10 @@ class GetRecommendationAPIHandler(AbstractRequestHandler):
 
             print("Response from mock database ", databaseResponse)
 
-            recommendationResult['name'] = databaseResponse.breed
-            recommendationResult['size'] = apiRequest.arguments.size
-            recommendationResult['energy'] = apiRequest.arguments.energy
-            recommendationResult['temperament'] = apiRequest.arguments.temperament
+            recommendationResult['name'] = databaseResponse['breed']
+            recommendationResult['size'] = api_request.arguments['size']
+            recommendationResult['energy'] = api_request.arguments['energy']
+            recommendationResult['temperament'] = api_request.arguments['temperament']
 
         response = buildSuccessApiResponse(recommendationResult)
         
@@ -111,10 +110,10 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 # *****************************************************************************
 # Resolves catalog value using Entity Resolution
 def resolveEntity(resolvedEntity, slotName):
-    erAuthorityResolution = resolvedEntity[slotName].resolutions.resolutionsPerAuthority[0]
+    erAuthorityResolution = resolvedEntity[slotName].resolutions.resolutions_per_authority[0]
     value = None
 
-    if erAuthorityResolution.status.code == 'ER_SUCCESS_MATCH':
+    if erAuthorityResolution.status.code.value == 'ER_SUCCESS_MATCH':
         value = erAuthorityResolution.values[0].value.name
 
     return value
@@ -181,7 +180,7 @@ class LoggingRequestInterceptor(AbstractRequestInterceptor):
 
 
 class LoggingResponseInterceptor(AbstractResponseInterceptor):
-    def process(handler_input, response):
+    def process(self, handler_input, response):
         print("Response generated: {}".format(response))
 
 
@@ -200,7 +199,7 @@ sb.add_request_handler(IntentReflectorHandler())
 sb.add_exception_handler(CatchAllExceptionHandler())
 
 # register interceptors
-sb.add_global_response_interceptor(LoggingRequestInterceptor())
+sb.add_global_request_interceptor(LoggingRequestInterceptor())
 sb.add_global_response_interceptor(LoggingResponseInterceptor())
 
 lambda_handler = sb.lambda_handler()

@@ -1,4 +1,3 @@
-
 import logging
 import json
 import ask_sdk_core.utils as ask_utils
@@ -21,19 +20,20 @@ with open('PetMatch.json', 'r') as myfile:
 
 data = json.loads(jsonData)
 
+
 class GetRecommendationAPIHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
-        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.apiRequest.name == 'getRecommendation'
+        return ask_utils.request_util.get_request_type(handler_input) == 'Dialog.API.Invoked' and handler_input.request_envelope.request.api_request.name == 'getRecommendation'
 
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        apiRequest = handler_input.request_envelope.request.apiRequest
+        api_request = handler_input.request_envelope.request.api_request
 
-        energy = resolveEntity(apiRequest.slots, "energy")
-        size = resolveEntity(apiRequest.slots, "size")
-        temperament = resolveEntity(apiRequest.slots, "temperament")
+        energy = resolveEntity(api_request.slots, "energy")
+        size = resolveEntity(api_request.slots, "size")
+        temperament = resolveEntity(api_request.slots, "temperament")
 
         recommendationResult = {}
 
@@ -43,10 +43,10 @@ class GetRecommendationAPIHandler(AbstractRequestHandler):
 
             print("Response from mock database ", databaseResponse)
 
-            recommendationResult['name'] = databaseResponse.breed
-            recommendationResult['size'] = apiRequest.arguments.size
-            recommendationResult['energy'] = apiRequest.arguments.energy
-            recommendationResult['temperament'] = apiRequest.arguments.temperament
+            recommendationResult['name'] = databaseResponse['breed']
+            recommendationResult['size'] = api_request.arguments['size']
+            recommendationResult['energy'] = api_request.arguments['energy']
+            recommendationResult['temperament'] = api_request.arguments['temperament']
 
         response = buildSuccessApiResponse(recommendationResult)
         
@@ -81,10 +81,10 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 # *****************************************************************************
 # Resolves catalog value using Entity Resolution
 def resolveEntity(resolvedEntity, slotName):
-    erAuthorityResolution = resolvedEntity[slotName].resolutions.resolutionsPerAuthority[0]
+    erAuthorityResolution = resolvedEntity[slotName].resolutions.resolutions_per_authority[0]
     value = None
 
-    if erAuthorityResolution.status.code == 'ER_SUCCESS_MATCH':
+    if erAuthorityResolution.status.code.value == 'ER_SUCCESS_MATCH':
         value = erAuthorityResolution.values[0].value.name
 
     return value
@@ -151,7 +151,7 @@ class LoggingRequestInterceptor(AbstractRequestInterceptor):
 
 
 class LoggingResponseInterceptor(AbstractResponseInterceptor):
-    def process(handler_input, response):
+    def process(self, handler_input, response):
         print("Response generated: {}".format(response))
 
 
@@ -169,7 +169,7 @@ sb.add_request_handler(IntentReflectorHandler())
 sb.add_exception_handler(CatchAllExceptionHandler())
 
 # register interceptors
-sb.add_global_response_interceptor(LoggingRequestInterceptor())
+sb.add_global_request_interceptor(LoggingRequestInterceptor())
 sb.add_global_response_interceptor(LoggingResponseInterceptor())
 
 lambda_handler = sb.lambda_handler()
