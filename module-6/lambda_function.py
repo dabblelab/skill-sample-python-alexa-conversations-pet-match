@@ -28,11 +28,11 @@ class GetDescriptionAPIHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        recommendationResult = handler_input.request_envelope.request.api_request.arguments.recommendation_result
-
+        arguments = handler_input.request_envelope.request.api_request.arguments
+        recommendationResult = arguments['recommendationResult']
         # setting the default response.
-        databaseResponse = "I don't know much about " + recommendationResult['name'] + "."
-        
+        databaseResponse = "I don't know much about " + recommendationResult['name']  + "."
+       
         energy = recommendationResult['energy']
         size = recommendationResult['size']
         temperament = recommendationResult['temperament']
@@ -43,7 +43,7 @@ class GetDescriptionAPIHandler(AbstractRequestHandler):
             databaseResponse = data[key]
         
         descriptionEntity = {
-            "description": databaseResponse.description
+            "description": databaseResponse['description']
         }
         
         response = buildSuccessApiResponse(descriptionEntity)
